@@ -1,0 +1,23 @@
+{
+  "homepage": "https://github.com/rValin/TranslationBundle",
+  "keywords": ["translation", "symfony", "edit"],
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "type": "library",
+  "name": "rvalin/translation-bundle",
+  "description": "a Symfony Bundle to update translation",
+  "require": {
+    "php": ">=5.3.9",
+    "symfony/symfony": ">=2.7"
+  },
+  "autoload": {
+    "psr-4": { "RValin\\TranslationBundle\\": "" }
+  },
+  "authors": [
+    {
+      "name": "Romain Valin",
+      "email": "romain.valin.web@gmail.com",
+      "homepage": "https://www.romain-valin.com"
+    }
+  ]
+}

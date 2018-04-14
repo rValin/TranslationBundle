@@ -1,0 +1,4 @@
+test:
+    toto: tt
+    toto2: 'test with parameter %value%'
+    toto3: 'There is one apsple|There are %count% apples'

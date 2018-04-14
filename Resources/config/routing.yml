@@ -1,0 +1,3 @@
+r_valin_translation_update:
+    path:     /update
+    defaults: { _controller: RValinTranslationBundle:Default:update }

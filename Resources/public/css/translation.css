@@ -1,0 +1,84 @@
+#r_valin_translation_info {
+    position: absolute;
+    bottom: 50px;
+    right: 15px;
+    z-index: 10000;
+    width: 450px;
+    border: 1px solid #b8daff;
+}
+
+#r_valin_translation_info section {
+    padding: 0 15px;
+}
+#r_valin_translation_info .section-title {
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 5px;
+}
+
+#r_valin_translation_info .info {
+    display: inline-block;
+    width: 50%;
+}
+
+#r_valin_translation_info .info-title {
+    font-weight: bold;
+}
+
+#r_valin_translation_info .button-container {
+    text-align: center;
+}
+
+#r_valin_translation_info button {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    cursor: pointer;
+    margin: 15px;
+}
+
+#rvalin_translation-save {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+#rvalin_translation-save:hover {
+    color: #fff;
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+#rvalin_translation-cancel {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#rvalin_translation-cancel:hover {
+    color: #fff;
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+#r_valin_translation_info header{
+    color: #004085;
+    background-color: #cce5ff;
+    padding: 10px;
+    text-align: center;
+}
+
+#r_valin_translation_edit {
+    width: 100%;
+}
