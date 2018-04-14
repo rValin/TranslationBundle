@@ -66,9 +66,10 @@ class TranslationExtension extends \Twig_Extension
 
         return sprintf(
             "<script>rvalin_translation.init('%s', '%s', %s);</script>",
-            json_encode($translations),
+            addcslashes(json_encode( $translations, JSON_HEX_APOS),'\\'),
             $this->_router->generate('r_valin_translation_update'),
             ($this->_useTextarea) ? 'true' : 'false'
         );
+
     }
 }

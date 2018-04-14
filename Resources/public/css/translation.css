@@ -1,10 +1,11 @@
 #r_valin_translation_info {
-    position: absolute;
+    position: fixed;
     bottom: 50px;
     right: 15px;
     z-index: 10000;
     width: 450px;
     border: 1px solid #b8daff;
+    background-color: #fff;
 }
 
 #r_valin_translation_info section {

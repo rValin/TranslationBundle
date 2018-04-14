@@ -2,11 +2,11 @@
 
 namespace RValin\TranslationBundle\Updater;
 
+use Symfony\Bundle\FrameworkBundle\Translation\TranslationLoader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Dumper\FileDumper;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 
 class FileUpdater implements UpdaterInterface
 {
@@ -25,11 +25,11 @@ class FileUpdater implements UpdaterInterface
     protected $_dumpersConfig = [];
 
     /**
-     * @var TranslationReaderInterface
+     * @var TranslationLoader
      */
     private $reader;
 
-    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerInterface $container, $allowedBundles, $dumpersConfig)
+    public function __construct(KernelInterface $kernel, TranslationLoader $reader, ContainerInterface $container, $allowedBundles, $dumpersConfig)
     {
         $this->_kernel = $kernel;
         $this->_container = $container;
@@ -137,7 +137,7 @@ class FileUpdater implements UpdaterInterface
         $currentCatalogue = new MessageCatalogue($locale);
         foreach ($transPaths as $path) {
             if (is_dir($path)) {
-                $this->reader->read($path, $currentCatalogue);
+                $this->reader->loadMessages($path, $currentCatalogue);
             }
         }
 

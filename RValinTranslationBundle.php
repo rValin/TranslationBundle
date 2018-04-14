@@ -16,7 +16,6 @@ class RValinTranslationBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
-        $container->addCompilerPass(new OverrideServiceCompilerPass());
         $container->addCompilerPass(new UpdatersPass());
     }
 }

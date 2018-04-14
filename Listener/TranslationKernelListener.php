@@ -46,14 +46,14 @@ class TranslationKernelListener
 
         // convert all translation in html tag
         do {
-            $html = preg_replace('#<([^<>]*)\|\|([0-9]+)\|\|(.*)\|\|\|\|([^<>]*)>#', '<$1$3$4>', $html, -1, $count);
+            $html = preg_replace('#<([^<>]*)\|\|([0-9]+)\|\|([\s\S]*)\|\|\|\|([^<>]*)>#U', '<$1$3$4>', $html, -1, $count);
         } while ($count > 0);
 
         // convert all translation in head
         preg_match('#<head>([\s\S]+)</head>#', $html, $headContent);
         $headContent = end($headContent);
         do {
-            $headContent = preg_replace('#\|\|([0-9]+)\|\|(.*)\|\|\|\|#', '$2', $headContent, -1, $count);
+            $headContent = preg_replace('#\|\|([0-9]+)\|\|([\s\S]*)\|\|\|\|#U', '$2', $headContent, -1, $count);
         } while ($count > 0);
         $html = preg_replace('#<head>([\s\S]+)</head>#', '<head>'.$headContent.'</head>', $html);
 
@@ -63,7 +63,7 @@ class TranslationKernelListener
         if($this->contentEditable) {
             $contentEditable = 'contentEditable="true"';
         }
-        $html = preg_replace('#\|\|([0-9]+)\|\|(.*)\|\|\|\|#', '<trans data-id="$1" '.$contentEditable.'>$2</trans>', $html);
+        $html = preg_replace('#\|\|([0-9]+)\|\|([.\S\s]*)\|\|\|\|#U', '<trans data-id="$1" '.$contentEditable.'>$2</trans>', $html);
         $event->getResponse()->setContent($html);
     }
 }

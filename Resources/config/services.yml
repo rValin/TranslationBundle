@@ -10,12 +10,17 @@ services:
         tags:
             - { name: twig.extension }
 
+    rvalin.translation.translator:
+        class: RValin\TranslationBundle\Translation\Translator
+        arguments: ['@translator.default', '%rvalin_translation.allowed_domains%']
+
+
     rvalin.translation.updaters:
         class: RValin\TranslationBundle\Updater\Updaters
 
     rvalin.translation.updater.file:
         class: RValin\TranslationBundle\Updater\FileUpdater
-        arguments: ['@kernel', '@translation.reader', '@service_container', '%rvalin_translation.allowed_bundles%', '%rvalin_translation.dumpers_config%']
+        arguments: ['@kernel', '@translation.loader', '@service_container', '%rvalin_translation.allowed_bundles%', '%rvalin_translation.dumpers_config%']
         tags:
             - { name: rvalin.translation.updater, alias: 'file' }
 
