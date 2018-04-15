@@ -4,6 +4,9 @@ namespace RValin\TranslationBundle\Updater;
 
 class Updaters
 {
+    /**
+     * @var UpdaterInterface[]
+     */
     private $updaters = [];
 
     public function addUpdater(UpdaterInterface $updater, $alias)
@@ -11,6 +14,12 @@ class Updaters
         $this->updaters[$alias] = $updater;
     }
 
+    /**
+     * @param $name
+     *
+     * @return UpdaterInterface
+     * @throws \Exception
+     */
     public function getUpdater($name)
     {
         if(!array_key_exists($name, $this->updaters))

@@ -1,12 +1,14 @@
 services:
     rvalin.translation.translation_listener:
         class: RValin\TranslationBundle\Listener\TranslationKernelListener
-        arguments: ['@translator', "%rvalin_translation.edit.content_editable%"]
+        arguments: ['@translator', "%rvalin_translation.edit.content_editable%", "%rvalin_translation.role%", "@security.authorization_checker"]
         tags:
             - { name: kernel.event_listener, event: kernel.response }
+            - { name: kernel.event_listener, event: kernel.request }
+
     rvalin.translation.translation_extension:
         class: RValin\TranslationBundle\Twig\TranslationExtension
-        arguments: ['@translator', '@router', '%rvalin_translation.edit.textarea%']
+        arguments: ['@translator', '@router', '%rvalin_translation.edit.textarea%', "%rvalin_translation.role%", "@security.authorization_checker"]
         tags:
             - { name: twig.extension }
 

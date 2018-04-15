@@ -6,6 +6,8 @@ use Symfony\Component\Translation\TranslatorInterface;
 
 class Translator implements TranslatorInterface, TranslatorBagInterface
 {
+    const SESSION_ATTR = 'translation_live_update';
+
     /**
      * List of translations used
      * @var array
@@ -15,7 +17,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     /**
      * @var bool
      */
-    private $live_update = true;
+    private $live_update = false;
 
     /**
      * @var array
@@ -150,6 +152,10 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
     public function setLocale($locale)
     {
         $this->_translator->setLocale($locale);
+    }
+
+    public function setLiveUpdate($liveUpdate) {
+        $this->live_update = $liveUpdate;
     }
 
     public function getCatalogue($locale = null)

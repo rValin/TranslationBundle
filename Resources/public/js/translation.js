@@ -5,12 +5,50 @@ var rvalin_translation = {
     current_id: null,
     route_update: null,
     use_textarea: true,
+    live_translation: true,
 
-    init: function(translations, route_update, use_textarea) {
-        this.initEvents();
+    init: function(translations, route_update, use_textarea, liveTranslation) {
+        this.live_translation = liveTranslation;
+        if(liveTranslation) {
+            this.initEvents();
+        }
+        this.initToggleLiveTranslationButton();
+
         this.translations = JSON.parse(translations);
         this.route_update = route_update;
         this.use_textarea = use_textarea;
+    },
+
+    initToggleLiveTranslationButton: function() {
+
+        let button = '<a href="'+this.getUpdateLink()+'" id="rvalin_translation_toggle" class="'+ (!this.live_translation? 'active' : 'stop') +'">';
+
+        if (!this.live_translation) {
+            button += 'Activate live edition';
+        } else {
+            button += 'Stop live edition';
+        }
+        button += '</a>';
+
+        $('body').append(button)
+    },
+
+    getUpdateLink: function() {
+        baseUrl = [location.protocol, '//', location.host, location.pathname].join('');
+        urlQueryString = document.location.search;
+        var newParam = 'update_translation=' + (this.live_translation ? '0': '1'),
+            params = '?' + newParam;
+
+        if (urlQueryString) {
+            keyRegex = new RegExp('([\?&])update_translation[^&]*');
+            // If param exists already, update it
+            if (urlQueryString.match(keyRegex) !== null) {
+                params = urlQueryString.replace(keyRegex, "$1" + newParam);
+            } else { // Otherwise, add it to end of query string
+                params = urlQueryString + '&' + newParam;
+            }
+        }
+        return baseUrl + params;
     },
 
     initCancelButton: function() {

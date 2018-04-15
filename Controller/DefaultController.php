@@ -10,17 +10,25 @@ class DefaultController extends Controller
 {
     public function updateAction(Request $request)
     {
+        if (!$this->isGranted($this->getParameter('rvalin_translation.role'))) {
+            throw $this->createAccessDeniedException();
+        }
+
         $updaters = $this->get('rvalin.translation.updaters');
-        foreach($this->getParameter('rvalin_translation.updaters') as $updaterName)
+        $updaterNames = $this->getParameter('rvalin_translation.updaters');
+        if(empty($updaterNames)) {
+            throw new \InvalidArgumentException('No updater selected');
+        }
+
+        $key = $request->request->get('key');
+        $translationCode = $request->request->get('translationCode');
+        $domain = $request->request->get('domain');
+        $locale = $request->request->get('locale');
+
+        foreach($updaterNames as $updaterName)
         {
             $updater = $updaters->getUpdater($updaterName);
-
-            $updater->update(
-                $request->request->get('key'),
-                $request->request->get('translationCode'),
-                $request->request->get('domain'),
-                $request->request->get('locale')
-            );
+            $updater->update($key, $translationCode, $domain, $locale);
         }
 
         return new JsonResponse(['responseCode' => 200]);

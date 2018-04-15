@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -28,17 +29,24 @@ class TranslationExtension extends \Twig_Extension
      */
     private $_useTextarea;
 
+    private $_requiredRole;
+
+
+    private $_authorizationChecker;
+
     /**
      * TranslationExtension constructor.
      *
      * @param TranslatorInterface $translator
      * @param RouterInterface     $router
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router, $useTextarea)
+    public function __construct(TranslatorInterface $translator, RouterInterface $router, $useTextarea, $requiredRole, AuthorizationChecker $authorizationChecker)
     {
         $this->_translator = $translator;
         $this->_router = $router;
         $this->_useTextarea = $useTextarea;
+        $this->_authorizationChecker = $authorizationChecker;
+        $this->_requiredRole = $requiredRole;
     }
 
     /**
@@ -56,19 +64,24 @@ class TranslationExtension extends \Twig_Extension
      */
     public function translationList()
     {
+        if(!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
+            return null;
+        }
+
         try{
             $translations = $this->_translator->getUsedTranslations();
+            $liveTranslation = $this->_translator->isLiveUpdate();
         }catch (\Exception $e)
         {
-
             return null;
         }
 
         return sprintf(
-            "<script>rvalin_translation.init('%s', '%s', %s);</script>",
+            "<script>rvalin_translation.init('%s', '%s', %s, %s);</script>",
             addcslashes(json_encode( $translations, JSON_HEX_APOS),'\\'),
             $this->_router->generate('r_valin_translation_update'),
-            ($this->_useTextarea) ? 'true' : 'false'
+            $this->_useTextarea ? 'true' : 'false',
+            $liveTranslation ? 'true' : 'false'
         );
 
     }

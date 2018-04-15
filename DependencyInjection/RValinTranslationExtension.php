@@ -32,8 +32,6 @@ class RValinTranslationExtension extends Extension
         $container->setParameter('rvalin_translation.edit.content_editable', $config['edit']['content_editable']);
         $container->setParameter('rvalin_translation.edit.textarea', $config['edit']['textarea']);
         $container->setParameter('rvalin_translation.allowed_domains', $config['allowed_domains']);
-
-        // todo
         $container->setParameter('rvalin_translation.role', $config['role']);
 
 

@@ -1,3 +1,7 @@
+trans {
+    cursor: pointer;
+}
+
 #r_valin_translation_info {
     position: fixed;
     bottom: 50px;
@@ -30,7 +34,7 @@
     text-align: center;
 }
 
-#r_valin_translation_info button {
+#r_valin_translation_info button, #rvalin_translation_toggle {
     display: inline-block;
     font-weight: 400;
     text-align: center;
@@ -42,7 +46,6 @@
     user-select: none;
     border: 1px solid transparent;
     padding: .375rem .75rem;
-    font-size: 1rem;
     line-height: 1.5;
     border-radius: .25rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
@@ -50,24 +53,24 @@
     margin: 15px;
 }
 
-#rvalin_translation-save {
+#rvalin_translation-save, #rvalin_translation_toggle.active {
     color: #fff;
     background-color: #28a745;
     border-color: #28a745;
 }
-#rvalin_translation-save:hover {
+#rvalin_translation-save:hover, #rvalin_translation_toggle.active:hover {
     color: #fff;
     background-color: #218838;
     border-color: #1e7e34;
 }
 
-#rvalin_translation-cancel {
+#rvalin_translation-cancel, #rvalin_translation_toggle.stop {
     color: #fff;
     background-color: #dc3545;
     border-color: #dc3545;
 }
 
-#rvalin_translation-cancel:hover {
+#rvalin_translation-cancel:hover, #rvalin_translation_toggle.stop:hover {
     color: #fff;
     background-color: #c82333;
     border-color: #bd2130;
@@ -83,3 +86,11 @@
 #r_valin_translation_edit {
     width: 100%;
 }
+
+#rvalin_translation_toggle {
+    position: fixed;
+    bottom: 0px;
+    z-index: 10000;
+    right: 50px;
+}
+
