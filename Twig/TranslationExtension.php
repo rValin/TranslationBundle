@@ -52,10 +52,25 @@ class TranslationExtension extends \Twig_Extension
     /**
      * @return array|\Twig_SimpleFunction[]
      */
-    public function getFunctions() {
+    public function getFunctions()
+    {
         return [
             'translationList' => new \Twig_SimpleFunction('translationList', [$this, 'translationList'], ['is_safe' => ['html']]),
+            'translationLiveEditIsEnabled' => new \Twig_SimpleFunction('translationLiveEditIsEnabled', [$this, 'translationLiveEditIsEnabled']),
         ];
+    }
+
+    public function translationLiveEditIsEnabled()
+    {
+        if (!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
+            return false;
+        }
+
+        try {
+            return $this->_translator->isLiveUpdate();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
 
@@ -64,25 +79,23 @@ class TranslationExtension extends \Twig_Extension
      */
     public function translationList()
     {
-        if(!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
+        if (!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
             return null;
         }
 
-        try{
+        try {
             $translations = $this->_translator->getUsedTranslations();
             $liveTranslation = $this->_translator->isLiveUpdate();
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return null;
         }
 
         return sprintf(
             "<script>rvalin_translation.init('%s', '%s', %s, %s);</script>",
-            addcslashes(json_encode( $translations, JSON_HEX_APOS),'\\'),
+            addcslashes(json_encode($translations, JSON_HEX_APOS), '\\'),
             $this->_router->generate('r_valin_translation_update'),
             $this->_useTextarea ? 'true' : 'false',
             $liveTranslation ? 'true' : 'false'
         );
-
     }
 }

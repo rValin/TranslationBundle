@@ -23,7 +23,7 @@ class RValinTranslationExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
 
         $container->setParameter('rvalin_translation.dumpers_config', $config['dumpers_config']);
@@ -34,11 +34,9 @@ class RValinTranslationExtension extends Extension
         $container->setParameter('rvalin_translation.allowed_domains', $config['allowed_domains']);
         $container->setParameter('rvalin_translation.role', $config['role']);
 
-
         $definition = $container->findDefinition('rvalin.translation.translator');
         $definition->replaceArgument(0, new Reference($config['translator_service']));
 
         $container->setAlias('translator', 'rvalin.translation.translator');
-
     }
 }

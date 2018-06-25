@@ -2,6 +2,7 @@
 
 namespace RValin\TranslationBundle\DependencyInjection;
 
+use RValin\TranslationBundle\Translation\Translator;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -36,7 +37,7 @@ class Configuration implements ConfigurationInterface
                 ->prototype('scalar')->end()
             ->end()
             ->scalarNode('role')
-                ->defaultValue('ROLE_UPDATE_TRANSLATION')
+                ->defaultValue(Translator::DEFAULT_ROLE)
             ->end()
             ->arrayNode('edit')
                 ->addDefaultsIfNotSet()
@@ -51,8 +52,7 @@ class Configuration implements ConfigurationInterface
             ->end()
             ->scalarNode('translator_service')
                 ->defaultValue('translator.default')
-            ->end()
-        ;
+            ->end();
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for

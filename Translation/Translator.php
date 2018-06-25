@@ -1,38 +1,44 @@
 <?php
 namespace RValin\TranslationBundle\Translation;
 
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
 class Translator implements TranslatorInterface, TranslatorBagInterface
 {
+
+    protected $cacheDir;
+
     const SESSION_ATTR = 'translation_live_update';
+    const DEFAULT_ROLE = 'ROLE_UPDATE_TRANSLATION';
 
     /**
      * List of translations used
      * @var array
      */
-    private $used_translations = [];
+    private $usedTranslations = [];
 
     /**
      * @var bool
      */
-    private $live_update = false;
+    private $liveUpdate = false;
 
     /**
      * @var array
      */
-    private $allowed_domains;
+    private $allowedDomains;
 
     /**
      * @var TranslatorInterface
      */
     protected $_translator;
 
-    public function __construct(TranslatorInterface $translator, $allowedDomains)
+    public function __construct(TranslatorInterface $translator, $allowedDomains, $cacheDir)
     {
         $this->_translator = $translator;
-        $this->allowed_domains = $allowedDomains;
+        $this->allowedDomains = $allowedDomains;
+        $this->cacheDir = $cacheDir;
     }
 
     /**
@@ -48,9 +54,10 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      *
      * @return string
      */
-    private function registerTranslation($translationCode, $translationValue, $key, $parameters, $domain, $locale, $number = null, $plural = false) {
-        $id = count($this->used_translations);
-        $this->used_translations[$id] = [
+    private function registerTranslation($translationCode, $translationValue, $key, $parameters, $domain, $locale, $number = null, $plural = false)
+    {
+        $id = count($this->usedTranslations);
+        $this->usedTranslations[$id] = [
             'key' => $key,
             'translationCode' => $translationCode,
             'translationValue' => $translationValue,
@@ -59,31 +66,31 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
             'domain' => ($domain === null) ? 'messages' : $domain,
             'locale' => ($locale === null) ? $this->getLocale() : $locale,
             'plural' => $plural,
+            'isVisible' => true,
         ];
-        return '||'.$id.'||'.$translationValue.'||||';
+        return '||' . $id . '||' . $translationValue . '||||';
     }
 
-    public function getUsedTranslations(){
-        return $this->used_translations;
+    public function getUsedTranslations()
+    {
+        return $this->usedTranslations;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function trans($id, array $parameters = array(), $domain = null, $locale = null)
+    public function trans($id, array $parameters = [], $domain = null, $locale = null)
     {
         if ($this->isLiveUpdate() && $this->isAllowedDomain($domain)) {
-            if(null === $locale) {
+            if (null === $locale) {
                 $locale = $this->getLocale();
             }
 
-            if(null === $domain) {
+            if (null === $domain) {
                 $domain = 'messages';
             }
 
-
-            if($this->getCatalogue($locale)->has($id, $domain))
-            {
+            if ($this->getCatalogue($locale)->has($id, $domain)) {
                 return $this->registerTranslation(
                     $this->_translator->trans($id, [], $domain, $locale),
                     $this->_translator->trans($id, $parameters, $domain, $locale),
@@ -104,17 +111,16 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      */
     public function transChoice($id, $number, array $parameters = [], $domain = 'messages', $locale = null)
     {
-        if ($this->live_update && $this->isAllowedDomain($domain)) {
-            if(null === $locale) {
+        if ($this->liveUpdate && $this->isAllowedDomain($domain)) {
+            if (null === $locale) {
                 $locale = $this->getLocale();
             }
 
-            if(null === $domain) {
+            if (null === $domain) {
                 $domain = 'messages';
             }
 
-
-            if($this->getCatalogue($locale)->has($id, $domain)) {
+            if ($this->getCatalogue($locale)->has($id, $domain)) {
                 return $this->registerTranslation(
                     $this->_translator->trans($id, [], $domain, $locale),
                     $this->_translator->transChoice($id, $number, $parameters, $domain, $locale),
@@ -133,7 +139,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
     protected function isAllowedDomain($domain)
     {
-        return (empty($this->allowed_domains) || \in_array($domain, $this->allowed_domains, true));
+        return (empty($this->allowedDomains) || \in_array($domain, $this->allowedDomains, true));
     }
 
     /**
@@ -141,7 +147,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      */
     public function isLiveUpdate()
     {
-        return $this->live_update;
+        return $this->liveUpdate;
     }
 
     public function getLocale()
@@ -154,12 +160,83 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
         $this->_translator->setLocale($locale);
     }
 
-    public function setLiveUpdate($liveUpdate) {
-        $this->live_update = $liveUpdate;
+    public function setLiveUpdate($liveUpdate)
+    {
+        $this->liveUpdate = $liveUpdate;
     }
 
     public function getCatalogue($locale = null)
     {
         return $this->_translator->getCatalogue($locale);
+    }
+
+    /**
+     * Remove the cache file corresponding to the given locale.
+     *
+     * @param string $locale
+     * @return boolean
+     */
+    public function removeCacheFile($locale)
+    {
+        $localeExploded = explode('_', $locale);
+        $finder = new Finder();
+        $finder->files()->in($this->cacheDir)->name(sprintf('/catalogue\.%s.*\.php$/', $localeExploded[0]));
+        $deleted = true;
+        foreach ($finder as $file) {
+            $path = $file->getRealPath();
+            $this->invalidateSystemCacheForFile($path);
+            $deleted = unlink($path);
+
+            $metadata = $path . '.meta';
+            if (file_exists($metadata)) {
+                $this->invalidateSystemCacheForFile($metadata);
+                unlink($metadata);
+            }
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * Remove the cache file corresponding to each given locale.
+     *
+     * @param array $locales
+     */
+    public function removeLocalesCacheFiles($locales)
+    {
+        foreach ($locales as $locale) {
+            $this->removeCacheFile($locale);
+        }
+
+        // also remove database.resources.php cache file
+        $file = sprintf('%s/database.resources.php', $this->cacheDir);
+        if (file_exists($file)) {
+            $this->invalidateSystemCacheForFile($file);
+            unlink($file);
+        }
+
+        $metadata = $file . '.meta';
+        if (file_exists($metadata)) {
+            $this->invalidateSystemCacheForFile($metadata);
+            unlink($metadata);
+        }
+    }
+
+    /**
+     * @param string $path
+     *
+     * @throws \RuntimeException
+     */
+    protected function invalidateSystemCacheForFile($path)
+    {
+        if (ini_get('apc.enabled') && function_exists('apc_delete_file')) {
+            if (apc_exists($path) && !apc_delete_file($path)) {
+                throw new \RuntimeException(sprintf('Failed to clear APC Cache for file %s', $path));
+            }
+        } elseif ('cli' === php_sapi_name() ? ini_get('opcache.enable_cli') : ini_get('opcache.enable')) {
+            if (function_exists("opcache_invalidate") && !opcache_invalidate($path, true)) {
+                throw new \RuntimeException(sprintf('Failed to clear OPCache for file %s', $path));
+            }
+        }
     }
 }

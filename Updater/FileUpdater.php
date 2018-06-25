@@ -34,8 +34,6 @@ class FileUpdater implements UpdaterInterface
         $this->_kernel = $kernel;
         $this->_container = $container;
         $this->reader = $reader;
-
-        dump($allowedBundles, $dumpersConfig);
         $this->_allowedBundles = $allowedBundles;
         $this->_dumpersConfig = $dumpersConfig;
     }
@@ -44,19 +42,19 @@ class FileUpdater implements UpdaterInterface
     {
         $catalogues = $this->getCatalogues($key, $domain, $locale);
 
-        foreach($catalogues as $catalogue)
-        {
+        foreach ($catalogues as $catalogue) {
             $catalogue->set($key, $translation, $domain);
-            foreach ($catalogue->getResources() as $resource)
-            {
-                $regex  = '^.*\/([a-zA-Z0-9-_]+).'.$locale.'.([a-z]+)$';
-                preg_match('#'.$regex.'#', $resource->getResource(), $matches);
+            foreach ($catalogue->getResources() as $resource) {
+                $regex  = '^.*\/([a-zA-Z0-9-_]+).' . $locale . '.([a-z]+)$';
+                preg_match('#' . $regex . '#', $resource->getResource(), $matches);
 
-                if($matches[1] === $domain) {
+                if ($matches[1] === $domain) {
                     $this->updateFile($resource->getResource(), $catalogue, $domain, $matches[2]);
                 }
             }
         }
+
+        $this->_container->get('rvalin.translation.translator')->removeLocalesCacheFiles([$locale]);
     }
 
     /**
@@ -67,11 +65,10 @@ class FileUpdater implements UpdaterInterface
      */
     public function updateFile($file, MessageCatalogue $catalogue, $domain, $extension)
     {
-        $dumper = $this->_container->get('translation.dumper.'.$extension);
+        $dumper = $this->_container->get('translation.dumper.' . $extension);
 
-        if(!$dumper instanceof FileDumper)
-        {
-            throw new \InvalidArgumentException('$dumper should be an instance of '.FileDumper::class);
+        if (!$dumper instanceof FileDumper) {
+            throw new \InvalidArgumentException('$dumper should be an instance of ' . FileDumper::class);
         }
 
         $options = [];
@@ -79,7 +76,6 @@ class FileUpdater implements UpdaterInterface
             $options = $this->_dumpersConfig[$extension];
         }
 
-        dump($options);
         file_put_contents($file, $dumper->formatCatalogue($catalogue, $domain, $options));
     }
 
@@ -90,13 +86,12 @@ class FileUpdater implements UpdaterInterface
      *
      * @return MessageCatalogue[]
      */
-    protected function getCatalogues($key, $domain, $locale) {
+    protected function getCatalogues($key, $domain, $locale)
+    {
         $catalogues = $this->getCataloguePerBundle($locale);
         $validCatalogues = [];
-        foreach ($catalogues as $catalogue)
-        {
-            if($catalogue->has($key, $domain))
-            {
+        foreach ($catalogues as $catalogue) {
+            if ($catalogue->has($key, $domain)) {
                 $validCatalogues[] = $catalogue;
             }
         }
@@ -111,15 +106,14 @@ class FileUpdater implements UpdaterInterface
      */
     protected function getCataloguePerBundle($locale)
     {
-        $catalogues = [$this->loadCurrentMessages($locale, [$this->_kernel->getRootDir().'/Resources/translations'])];
+        $catalogues = [$this->loadCurrentMessages($locale, [$this->_kernel->getRootDir() . '/Resources/translations'])];
 
-        foreach ($this->_kernel->getBundles() as $bundle)
-        {
+        foreach ($this->_kernel->getBundles() as $bundle) {
             if (!empty($this->_allowedBundles) && \in_array($bundle->getName(), $this->_allowedBundles)) {
                 continue;
             }
 
-            $catalogues[] = $this->loadCurrentMessages($locale, [$bundle->getPath().'/Resources/translations']);
+            $catalogues[] = $this->loadCurrentMessages($locale, [$bundle->getPath() . '/Resources/translations']);
         }
 
         return $catalogues;

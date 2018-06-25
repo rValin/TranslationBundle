@@ -12,6 +12,17 @@ trans {
     background-color: #fff;
 }
 
+#r_valin_translation_info.fullscreen {
+    width: auto;
+    left: 15px;
+    top: 15px;
+}
+
+#r_valin_fullscreen {
+    float: right;
+    cursor: pointer;
+}
+
 #r_valin_translation_info section {
     padding: 0 15px;
 }
@@ -34,7 +45,7 @@ trans {
     text-align: center;
 }
 
-#r_valin_translation_info button, #rvalin_translation_toggle {
+#r_valin_translation_info button, #rvalin_translation_toggle, #rvalin_translation_suspend {
     display: inline-block;
     font-weight: 400;
     text-align: center;
@@ -53,24 +64,24 @@ trans {
     margin: 15px;
 }
 
-#rvalin_translation-save, #rvalin_translation_toggle.active {
+#rvalin_translation-save, #rvalin_translation_toggle.active, #rvalin_translation_suspend.active {
     color: #fff;
     background-color: #28a745;
     border-color: #28a745;
 }
-#rvalin_translation-save:hover, #rvalin_translation_toggle.active:hover {
+#rvalin_translation-save:hover, #rvalin_translation_toggle.active:hover, #rvalin_translation_suspend.active:hover {
     color: #fff;
     background-color: #218838;
     border-color: #1e7e34;
 }
 
-#rvalin_translation-cancel, #rvalin_translation_toggle.stop {
+#rvalin_translation-cancel, #rvalin_translation_toggle.stop, #rvalin_translation_suspend.suspend {
     color: #fff;
     background-color: #dc3545;
     border-color: #dc3545;
 }
 
-#rvalin_translation-cancel:hover, #rvalin_translation_toggle.stop:hover {
+#rvalin_translation-cancel:hover, #rvalin_translation_toggle.stop:hover, #rvalin_translation_suspend.suspend:hover {
     color: #fff;
     background-color: #c82333;
     border-color: #bd2130;
@@ -87,7 +98,7 @@ trans {
     width: 100%;
 }
 
-#rvalin_translation_toggle {
+#rvalin_translation_buttons {
     position: fixed;
     bottom: 0px;
     z-index: 10000;

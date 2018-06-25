@@ -4,6 +4,7 @@ namespace RValin\TranslationBundle\Updater;
 
 use Lexik\Bundle\TranslationBundle\Manager\TransUnitManager;
 use Lexik\Bundle\TranslationBundle\Storage\StorageInterface;
+use RValin\TranslationBundle\Translation\Translator;
 
 class LexikTranslationUpdater implements UpdaterInterface
 {
@@ -18,15 +19,21 @@ class LexikTranslationUpdater implements UpdaterInterface
     protected $transUnitManager;
 
     /**
+     * @var Translator
+     */
+    protected $translator;
+
+    /**
      * LexikTranslationUpdater constructor.
      *
      * @param StorageInterface $storage
      * @param TransUnitManager $transUnitManager
      */
-    public function __construct(StorageInterface $storage, TransUnitManager $transUnitManager)
+    public function __construct(StorageInterface $storage, TransUnitManager $transUnitManager, Translator $translator)
     {
         $this->storage = $storage;
         $this->transUnitManager = $transUnitManager;
+        $this->translator = $translator;
     }
 
     /**
@@ -36,5 +43,6 @@ class LexikTranslationUpdater implements UpdaterInterface
     {
         $transUnit = $this->storage->getTransUnitByKeyAndDomain($key, $domain);
         $this->transUnitManager->updateTranslation($transUnit, $locale, $translation, true);
+        $this->translator->removeLocalesCacheFiles([$locale]);
     }
 }

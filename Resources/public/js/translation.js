@@ -19,18 +19,35 @@ var rvalin_translation = {
         this.use_textarea = use_textarea;
     },
 
-    initToggleLiveTranslationButton: function() {
+    getPopupHTML: function(title, content, hasButtonFull) {
+        hasButtonFull = (hasButtonFull === undefined) ? false : hasButtonFull;
 
-        let button = '<a href="'+this.getUpdateLink()+'" id="rvalin_translation_toggle" class="'+ (!this.live_translation? 'active' : 'stop') +'">';
+        popup = '<div id="r_valin_translation_info">' +
+            '<header>' + title + ' <span id="r_valin_translation_status"></span>'
+        ;
 
-        if (!this.live_translation) {
-            button += 'Activate live edition';
+        if(hasButtonFull) {
+            popup += '<svg id="r_valin_fullscreen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path d="M4.5 11H3v4h4v-1.5H4.5V11zM3 7h1.5V4.5H7V3H3v4zm10.5 6.5H11V15h4v-4h-1.5v2.5zM11 3v1.5h2.5V7H15V3h-4z"/></svg>';
         } else {
-            button += 'Stop live edition';
+            popup += '<span class="close-popup">X</span>';
         }
-        button += '</a>';
 
-        $('body').append(button)
+        popup += '</header><section>' + content + '</section></div>'
+
+        return popup;
+    },
+
+    initToggleLiveTranslationButton: function() {
+        $('#rvalin-toggle-live-translation').change(function() {
+            console.log('change');
+            if($(this).is(':checked')) {
+                console.log('unbind');
+                rvalin_translation.unbindEvents();
+            } else {
+                console.log('bind');
+                rvalin_translation.initEvents();
+            }
+        }).change();
     },
 
     getUpdateLink: function() {
@@ -60,58 +77,95 @@ var rvalin_translation = {
     },
 
     saveTranslation: function() {
+        console.log('ok');
         let id = rvalin_translation.current_id;
         if(!id || !rvalin_translation.translations[id]) {
             console.error('No translation selected');
         }
+        let translation = rvalin_translation.translations[id];
 
         $.ajax({
             url: rvalin_translation.route_update,
             method: 'post',
-            data: rvalin_translation.translations[id],
+            data: {
+                key: translation.key,
+                domain: translation.domain,
+                locale: translation.locale,
+                translationCode: rvalin_translation.getCurrentTranslationCode(id),
+            },
             dataType: 'json'
         }).done(function(data) {
-            console.log('success');
+            rvalin_translation.updateStatus(id, 'saved');
         }).fail(function() {
-            console.log('error');
+            rvalin_translation.updateStatus(id, 'failed');
         });
     },
 
-    initEvents: function() {
-        $(this.tag).blur(function(){
+    updateStatus: function(id, status) {
+        let message = '';
+        switch (status) {
+            case 'hasChange':
+                message = 'Has change';
+                break;
+            case 'saved':
+                message = 'Change saved';
+                rvalin_translation.translations[id].translationCode = rvalin_translation.getCurrentTranslationCode(id);
+                break;
+            case 'failed':
+                message = 'Save failed';
+                break;
+        }
+
+        if(message) {
+            $('#r_valin_translation_status').text("("+message+")");
+        }
+
+        if(status == 'saved') {
+            rvalin_translation.hideInfo();
+        }
+    },
+
+    events: {
+        blur: function(){
             let transId = $(this).data('id');
             let translation = $(this).html();
             rvalin_translation.updateTranslation(transId, translation);
             rvalin_translation.updateText();
-        });
-
-        $(this.tag).click(function(e) {
+        },
+        clickAndFocus: function(e) {
+            e.stopImmediatePropagation();
             e.preventDefault();
-        });
-
-        $(this.tag).on('click focus', function(e) {
             let transId = $(this).data('id');
 
             if($(this).attr('contenteditable')) {
-                $(this).text(rvalin_translation.untranslate(transId));
+                $(this).text(rvalin_translation.getCurrentTranslationCode(transId));
             }
             rvalin_translation.showInfo(transId);
-        });
+        }
+    },
+
+    initEvents: function() {
+        $(this.tag).blur(rvalin_translation.events.blur);
+        $(this.tag).click(rvalin_translation.events.clickAndFocus);
+        $(this.tag).focus(rvalin_translation.events.clickAndFocus);
+    },
+
+    unbindEvents() {
+        $(this.tag).unbind('blur', rvalin_translation.events.blur);
+        $(this.tag).unbind('click',rvalin_translation.events.clickAndFocus);
+        $(this.tag).unbind('focus', rvalin_translation.events.clickAndFocus);
     },
 
     translate: function(id) {
         let translation = rvalin_translation.translations[id];
 
-        let message = translation.translationCode;
+        let translationCode = rvalin_translation.getCurrentTranslationCode(id);
+        let message = translationCode;
         if(translation.plural) {
-            message = rvalin_translation.pluralize(translation.translationCode, translation.number, translation.locale);
+            message = rvalin_translation.pluralize(translationCode, translation.number, translation.locale);
         }
 
         return rvalin_translation.replace_placeholders(message, translation.parameters);
-    },
-
-    untranslate: function(id) {
-        return rvalin_translation.translations[id].translationCode;
     },
 
     showInfo: function(id) {
@@ -124,9 +178,7 @@ var rvalin_translation = {
             allowPluralize = "true";
         }
 
-        let div = '<div id="r_valin_translation_info">' +
-            '<header>Edit this translation</header><section>' +
-            '<div class="section-title">Information</div>' +
+        let div = '<div class="section-title">Information</div>' +
             `<div class="info"><span class="info-title">Key:</span> ${translation.key}</div>` +
             `<div class="info"><span class="info-title">Domain:</span> ${translation.domain}</div>` +
             `<div class="info"><span class="info-title">Pluralize:</span> ${allowPluralize}</div>`
@@ -153,38 +205,66 @@ var rvalin_translation = {
 
         div += '<div class="button-container"><button id="rvalin_translation-cancel">Cancel</button>' +
             '<button id="rvalin_translation-save">Save</button>' +
-            '</div></section></div>'
+            '</div>'
         ;
 
-        $(div).appendTo('body');
-
+        $(rvalin_translation.getPopupHTML('Edit this translation', div, true)).appendTo($('body'));
         rvalin_translation.initTextarea();
         rvalin_translation.initCancelButton();
         rvalin_translation.initSaveButton();
+        rvalin_translation.initFullscreen();
+
+        if(rvalin_translation.translations[id].translationCode !== rvalin_translation.getCurrentTranslationCode(id)) {
+            rvalin_translation.updateStatus(id, 'hasChange');
+        }
+    },
+
+    initFullscreen: function() {
+        $('#r_valin_fullscreen').click(function(){
+            $('#r_valin_translation_info').toggleClass('fullscreen');
+
+            let rows = 4;
+            if($('#r_valin_translation_info').hasClass('fullscreen')) {
+                rows = 10;
+            }
+
+            $('#r_valin_translation_edit').prop('rows', rows);
+        })
+    },
+
+    getCurrentTranslationCode: function(id) {
+        if(rvalin_translation.translations[id].translationCodeUpdated) {
+            return rvalin_translation.translations[id].translationCodeUpdated;
+        }
+
+        return rvalin_translation.translations[id].translationCode;
+    },
+
+    updateCurrentTranslationCode: function(id, translationCode) {
+        rvalin_translation.translations[id].translationCodeUpdated = translationCode;
+        rvalin_translation.updateStatus(id, 'hasChange');
     },
 
     initTextarea: function() {
         $('#r_valin_translation_edit').change(function() {
-            rvalin_translation.translations[rvalin_translation.current_id].translationCode = $(this).val();
+            rvalin_translation.updateCurrentTranslationCode(rvalin_translation.current_id, $(this).val());
             rvalin_translation.updateText();
         });
     },
 
     updateText: function() {
         $(rvalin_translation.tag+'[data-id="'+rvalin_translation.current_id+'"]').html(rvalin_translation.translate(rvalin_translation.current_id));
-        $('#r_valin_translation_edit').val(rvalin_translation.translations[rvalin_translation.current_id].translationCode);
+        $('#r_valin_translation_edit').val(rvalin_translation.getCurrentTranslationCode(rvalin_translation.current_id));
     },
 
 
     hideInfo: function() {
-        rvalin_translation.current_id = null;
         $('#r_valin_translation_info').remove();
     },
 
     updateTranslation: function(id, translation) {
         translation = $('<div/>').html(translation).text();
-        rvalin_translation.translations[id].translationCode = translation;
-        rvalin_translation.translations[id].translationValue = rvalin_translation.translate(id);
+        rvalin_translation.updateCurrentTranslationCode(id, translation);
     },
 
     /**

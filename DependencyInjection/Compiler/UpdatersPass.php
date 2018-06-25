@@ -24,10 +24,13 @@ class UpdatersPass implements CompilerPassInterface
 
         foreach ($taggedServices as $id => $tags) {
             foreach ($tags as $attributes) {
-                $definition->addMethodCall('addUpdater', array(
+                $definition->addMethodCall(
+                    'addUpdater',
+                    [
                     new Reference($id),
                     $attributes['alias'],
-                ));
+                    ]
+                );
             }
         }
     }

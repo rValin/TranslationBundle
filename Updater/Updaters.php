@@ -22,8 +22,7 @@ class Updaters
      */
     public function getUpdater($name)
     {
-        if(!array_key_exists($name, $this->updaters))
-        {
+        if (!array_key_exists($name, $this->updaters)) {
             throw new \Exception(sprintf('Updater named %s was not found', $name));
         }
 

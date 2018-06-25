@@ -16,7 +16,7 @@ class DefaultController extends Controller
 
         $updaters = $this->get('rvalin.translation.updaters');
         $updaterNames = $this->getParameter('rvalin_translation.updaters');
-        if(empty($updaterNames)) {
+        if (empty($updaterNames)) {
             throw new \InvalidArgumentException('No updater selected');
         }
 
@@ -25,8 +25,7 @@ class DefaultController extends Controller
         $domain = $request->request->get('domain');
         $locale = $request->request->get('locale');
 
-        foreach($updaterNames as $updaterName)
-        {
+        foreach ($updaterNames as $updaterName) {
             $updater = $updaters->getUpdater($updaterName);
             $updater->update($key, $translationCode, $domain, $locale);
         }

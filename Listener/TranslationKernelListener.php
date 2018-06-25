@@ -32,7 +32,7 @@ class TranslationKernelListener
      * TranslatorListener constructor.
      * @param $translator
      */
-    public function __construct($translator, $contentEditable = false, $requiredRole, AuthorizationCheckerInterface $authChecker)
+    public function __construct($translator, $contentEditable, $requiredRole, AuthorizationCheckerInterface $authChecker)
     {
         $this->translator = $translator;
         $this->contentEditable = $contentEditable;
@@ -41,19 +41,32 @@ class TranslationKernelListener
     }
 
     /**
+     * @return bool
+     */
+    private function canEditTranslation()
+    {
+        try {
+            return $this->authChecked->isGranted($this->requiredRole);
+        } catch (\Exception $exception) {
+        }
+
+        return false;
+    }
+
+    /**
      * @param GetResponseEvent $event
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
         $session = $event->getRequest()->getSession();
-        if (!$this->authChecked->isGranted($this->requiredRole)) {
+        if (!$this->canEditTranslation()) {
             $session->remove(Translator::SESSION_ATTR);
             try {
                 $this->translator->setLiveUpdate(false);
-            } catch (\Exception $exception) {}
+            } catch (\Exception $exception) {
+            }
             return;
         }
-
 
         $updateTranslation = $event->getRequest()->query->get('update_translation');
 
@@ -63,8 +76,8 @@ class TranslationKernelListener
 
         try {
             $this->translator->setLiveUpdate($session->get(Translator::SESSION_ATTR, false));
-            $this->translator->setCanUpdate(true);
-        } catch (\Exception $exception) {}
+        } catch (\Exception $exception) {
+        }
     }
 
     /**
@@ -72,16 +85,15 @@ class TranslationKernelListener
      */
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        if (!$this->authChecked->isGranted($this->requiredRole)) {
+        if (!$this->canEditTranslation()) {
             return;
         }
 
-        try{
+        try {
             if (!$this->translator->isLiveUpdate()) {
                 return;
             }
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             return;
         }
 
@@ -99,15 +111,16 @@ class TranslationKernelListener
         do {
             $headContent = preg_replace('#\|\|([0-9]+)\|\|([\s\S]*)\|\|\|\|#U', '$2', $headContent, -1, $count);
         } while ($count > 0);
-        $html = preg_replace('#<head>([\s\S]+)</head>#', '<head>'.$headContent.'</head>', $html);
+
+        $html = preg_replace('#<head>([\s\S]+)</head>#', '<head>' . $headContent . '</head>', $html);
 
         // replace all translation with <trans> tag
 
         $contentEditable = '';
-        if($this->contentEditable) {
+        if ($this->contentEditable) {
             $contentEditable = 'contentEditable="true"';
         }
-        $html = preg_replace('#\|\|([0-9]+)\|\|([.\S\s]*)\|\|\|\|#U', '<trans title="update this text" data-id="$1" '.$contentEditable.'>$2</trans>', $html);
+        $html = preg_replace('#\|\|([0-9]+)\|\|([.\S\s]*)\|\|\|\|#U', '<trans title="update this text" data-id="$1" ' . $contentEditable . '>$2</trans>', $html);
         $event->getResponse()->setContent($html);
     }
 }

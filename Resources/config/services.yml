@@ -14,7 +14,7 @@ services:
 
     rvalin.translation.translator:
         class: RValin\TranslationBundle\Translation\Translator
-        arguments: ['@translator.default', '%rvalin_translation.allowed_domains%']
+        arguments: ['@translator.default', '%rvalin_translation.allowed_domains%', '%kernel.cache_dir%']
 
 
     rvalin.translation.updaters:
@@ -25,9 +25,3 @@ services:
         arguments: ['@kernel', '@translation.loader', '@service_container', '%rvalin_translation.allowed_bundles%', '%rvalin_translation.dumpers_config%']
         tags:
             - { name: rvalin.translation.updater, alias: 'file' }
-
-    rvalin.translation.updater.lexik_translation:
-        class: RValin\TranslationBundle\Updater\LexikTranslationUpdater
-        arguments: ['@lexik_translation.translation_storage', '@lexik_translation.trans_unit.manager']
-        tags:
-            - { name: rvalin.translation.updater, alias: 'lexik_translation' }
