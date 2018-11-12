@@ -77,12 +77,11 @@ var rvalin_translation = {
     },
 
     saveTranslation: function() {
-        console.log('ok');
-        let id = rvalin_translation.current_id;
+        var id = rvalin_translation.current_id;
         if(!id || !rvalin_translation.translations[id]) {
             console.error('No translation selected');
         }
-        let translation = rvalin_translation.translations[id];
+        var translation = rvalin_translation.translations[id];
 
         $.ajax({
             url: rvalin_translation.route_update,
@@ -102,7 +101,7 @@ var rvalin_translation = {
     },
 
     updateStatus: function(id, status) {
-        let message = '';
+        var message = '';
         switch (status) {
             case 'hasChange':
                 message = 'Has change';
@@ -127,15 +126,15 @@ var rvalin_translation = {
 
     events: {
         blur: function(){
-            let transId = $(this).data('id');
-            let translation = $(this).html();
+            var transId = $(this).data('id');
+            var translation = $(this).html();
             rvalin_translation.updateTranslation(transId, translation);
             rvalin_translation.updateText();
         },
         clickAndFocus: function(e) {
             e.stopImmediatePropagation();
             e.preventDefault();
-            let transId = $(this).data('id');
+            var transId = $(this).data('id');
 
             if($(this).attr('contenteditable')) {
                 $(this).text(rvalin_translation.getCurrentTranslationCode(transId));
@@ -150,17 +149,17 @@ var rvalin_translation = {
         $(this.tag).focus(rvalin_translation.events.clickAndFocus);
     },
 
-    unbindEvents() {
+    unbindEvents: function() {
         $(this.tag).unbind('blur', rvalin_translation.events.blur);
         $(this.tag).unbind('click',rvalin_translation.events.clickAndFocus);
         $(this.tag).unbind('focus', rvalin_translation.events.clickAndFocus);
     },
 
     translate: function(id) {
-        let translation = rvalin_translation.translations[id];
+        var translation = rvalin_translation.translations[id];
 
-        let translationCode = rvalin_translation.getCurrentTranslationCode(id);
-        let message = translationCode;
+        var translationCode = rvalin_translation.getCurrentTranslationCode(id);
+        var message = translationCode;
         if(translation.plural) {
             message = rvalin_translation.pluralize(translationCode, translation.number, translation.locale);
         }
@@ -171,35 +170,35 @@ var rvalin_translation = {
     showInfo: function(id) {
         rvalin_translation.hideInfo();
         rvalin_translation.current_id = id;
-        let translation = rvalin_translation.translations[id];
+        var translation = rvalin_translation.translations[id];
 
-        let allowPluralize = "false";
+        var allowPluralize = "false";
         if (translation.plural) {
             allowPluralize = "true";
         }
 
-        let div = '<div class="section-title">Information</div>' +
-            `<div class="info"><span class="info-title">Key:</span> ${translation.key}</div>` +
-            `<div class="info"><span class="info-title">Domain:</span> ${translation.domain}</div>` +
-            `<div class="info"><span class="info-title">Pluralize:</span> ${allowPluralize}</div>`
+        var div = '<div class="section-title">Information</div>' +
+            '<div class="info"><span class="info-title">Key:</span> ' + translation.key +'</div>' +
+            '<div class="info"><span class="info-title">Domain:</span> ' + translation.domain + '</div>' +
+            '<div class="info"><span class="info-title">Pluralize:</span> ' + allowPluralize + '</div>'
         ;
 
         if (translation.plural) {
-            div += `<div class="info"><span class="info-title">Number:</span> ${translation.number}</div>`;
+            div += '<div class="info"><span class="info-title">Number:</span> ' + translation.number + '</div>';
         }
 
         div += '<div class="section-title">Translation</div>';
         if (rvalin_translation.use_textarea) {
-            div += `<textarea rows="4" id="r_valin_translation_edit">${translation.translationCode}</textarea>`;
+            div += '<textarea rows="4" id="r_valin_translation_edit"> ' + translation.translationCode + '</textarea>';
         } else {
-            div += `<div>${translation.translationCode}</div>`;
+            div += '<div> ' +translation.translationCode + '</div>';
         }
 
 
         if (Object.keys(translation.parameters).length > 0) {
             div += '<div class="section-title">Parameters</div>';
-            for (let key in translation.parameters) {
-                div += `<div class="info"><span class="info-title">${key}</span> ${translation.parameters[key]}</div>`;
+            for (var key in translation.parameters) {
+                div += '<div class="info"><span class="info-title">${key}</span> ' + translation.parameters[key] + '</div>';
             }
         }
 
@@ -223,7 +222,7 @@ var rvalin_translation = {
         $('#r_valin_fullscreen').click(function(){
             $('#r_valin_translation_info').toggleClass('fullscreen');
 
-            let rows = 4;
+            var rows = 4;
             if($('#r_valin_translation_info').hasClass('fullscreen')) {
                 rows = 10;
             }
@@ -278,11 +277,11 @@ var rvalin_translation = {
      * @api private
      */
     replace_placeholders: function(message, placeholders) {
-        for (let _i in placeholders) {
-            let _r = new RegExp(_i, 'g');
+        for (var _i in placeholders) {
+            var _r = new RegExp(_i, 'g');
 
             if (_r.test(message)) {
-                let _v = String(placeholders[_i]).replace(new RegExp('\\$', 'g'), '$$$$');
+                var _v = String(placeholders[_i]).replace(new RegExp('\\$', 'g'), '$$$$');
                 message = message.replace(_r, _v);
             }
         }
@@ -291,7 +290,7 @@ var rvalin_translation = {
     },
 
     pluralize: function(message, number, locale) {
-        let _p,
+        var _p,
             _e,
             _explicitRules = [],
             _standardRules = [],
@@ -302,7 +301,7 @@ var rvalin_translation = {
             _iPluralRegex = new RegExp(/^\s*(\{\s*(\-?\d+[\s*,\s*\-?\d+]*)\s*\})|([\[\]])\s*(-Inf|\-?\d+)\s*,\s*(\+?Inf|\-?\d+)\s*([\[\]])/);
 
         for (_p = 0; _p < _parts.length; _p++) {
-            let _part = _parts[_p];
+            var _part = _parts[_p];
 
             if (_cPluralRegex.test(_part)) {
                 _matches = _part.match(_cPluralRegex);
@@ -320,7 +319,7 @@ var rvalin_translation = {
                 _matches = _e.match(_iPluralRegex);
 
                 if (_matches[1]) {
-                    let _ns = _matches[2].split(','),
+                    var _ns = _matches[2].split(','),
                         _n;
 
                     for (_n in _ns) {
@@ -329,8 +328,8 @@ var rvalin_translation = {
                         }
                     }
                 } else {
-                    let _leftNumber  = convert_number(_matches[4]);
-                    let _rightNumber = convert_number(_matches[5]);
+                    var _leftNumber  = convert_number(_matches[4]);
+                    var _rightNumber = convert_number(_matches[5]);
 
                     if (('[' === _matches[3] ? number >= _leftNumber : number > _leftNumber) &&
                         (']' === _matches[6] ? number <= _rightNumber : number < _rightNumber)) {
@@ -354,7 +353,7 @@ var rvalin_translation = {
      * @api private
      */
     plural_position: function(number, locale) {
-        let _locale = locale;
+        var _locale = locale;
 
         if ('pt_BR' === _locale) {
             _locale = 'xbr';
