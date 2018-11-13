@@ -79,11 +79,11 @@ class TranslationExtension extends \Twig_Extension
      */
     public function translationList()
     {
-        if (!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
-            return null;
-        }
-
         try {
+            if (!$this->_authorizationChecker->isGranted($this->_requiredRole)) {
+                return null;
+            }
+            
             $translations = $this->_translator->getUsedTranslations();
             $liveTranslation = $this->_translator->isLiveUpdate();
         } catch (\Exception $e) {
