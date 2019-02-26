@@ -262,7 +262,7 @@ var rvalin_translation = {
     },
 
     updateTranslation: function(id, translation) {
-        translation = $('<div/>').html(translation).text();
+        translation = $('<div/>').html(translation).html();
         rvalin_translation.updateCurrentTranslationCode(id, translation);
     },
 
