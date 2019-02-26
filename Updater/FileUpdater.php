@@ -7,6 +7,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Dumper\FileDumper;
 use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\Reader\TranslationReaderInterface;
+use Symfony\Component\Translation\Writer\TranslationWriterInterface;
 
 class FileUpdater implements UpdaterInterface
 {
@@ -29,13 +31,19 @@ class FileUpdater implements UpdaterInterface
      */
     private $reader;
 
-    public function __construct(KernelInterface $kernel, TranslationLoader $reader, ContainerInterface $container, $allowedBundles, $dumpersConfig)
+    /**
+     * @var TranslationWriterInterface
+     */
+    private $_writer;
+
+    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerInterface $container, $allowedBundles, $dumpersConfig, TranslationWriterInterface $writer)
     {
         $this->_kernel = $kernel;
         $this->_container = $container;
         $this->reader = $reader;
         $this->_allowedBundles = $allowedBundles;
         $this->_dumpersConfig = $dumpersConfig;
+        $this->_writer = $writer;
     }
 
     public function update($key, $translation, $domain, $locale)
@@ -65,18 +73,12 @@ class FileUpdater implements UpdaterInterface
      */
     public function updateFile($file, MessageCatalogue $catalogue, $domain, $extension)
     {
-        $dumper = $this->_container->get('translation.dumper.' . $extension);
-
-        if (!$dumper instanceof FileDumper) {
-            throw new \InvalidArgumentException('$dumper should be an instance of ' . FileDumper::class);
-        }
-
         $options = [];
         if (array_key_exists($extension, $this->_dumpersConfig)) {
             $options = $this->_dumpersConfig[$extension];
         }
 
-        file_put_contents($file, $dumper->formatCatalogue($catalogue, $domain, $options));
+        $options['path'] = dirname($file);
     }
 
     /**
@@ -106,15 +108,7 @@ class FileUpdater implements UpdaterInterface
      */
     protected function getCataloguePerBundle($locale)
     {
-        $catalogues = [$this->loadCurrentMessages($locale, [$this->_kernel->getRootDir() . '/Resources/translations'])];
-
-        foreach ($this->_kernel->getBundles() as $bundle) {
-            if (!empty($this->_allowedBundles) && \in_array($bundle->getName(), $this->_allowedBundles)) {
-                continue;
-            }
-
-            $catalogues[] = $this->loadCurrentMessages($locale, [$bundle->getPath() . '/Resources/translations']);
-        }
+        $catalogues = [$this->loadCurrentMessages($locale, [$this->_kernel->getProjectDir() . '/translations'])];
 
         return $catalogues;
     }
@@ -131,7 +125,7 @@ class FileUpdater implements UpdaterInterface
         $currentCatalogue = new MessageCatalogue($locale);
         foreach ($transPaths as $path) {
             if (is_dir($path)) {
-                $this->reader->loadMessages($path, $currentCatalogue);
+                $this->reader->read($path, $currentCatalogue);
             }
         }
 

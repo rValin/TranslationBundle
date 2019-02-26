@@ -15,13 +15,15 @@ services:
     rvalin.translation.translator:
         class: RValin\TranslationBundle\Translation\Translator
         arguments: ['@translator.default', '%rvalin_translation.allowed_domains%', '%kernel.cache_dir%']
+        public: true
 
 
     rvalin.translation.updaters:
         class: RValin\TranslationBundle\Updater\Updaters
+        public: true
 
     rvalin.translation.updater.file:
         class: RValin\TranslationBundle\Updater\FileUpdater
-        arguments: ['@kernel', '@translation.loader', '@service_container', '%rvalin_translation.allowed_bundles%', '%rvalin_translation.dumpers_config%']
+        arguments: ['@kernel', '@translation.reader', '@service_container', '%rvalin_translation.allowed_bundles%', '%rvalin_translation.dumpers_config%', '@translation.writer']
         tags:
             - { name: rvalin.translation.updater, alias: 'file' }
