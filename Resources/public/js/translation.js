@@ -137,7 +137,7 @@ var rvalin_translation = {
             var transId = $(this).data('id');
 
             if($(this).attr('contenteditable')) {
-                $(this).text(rvalin_translation.getCurrentTranslationCode(transId));
+                $(this).html(rvalin_translation.getCurrentTranslationCode(transId));
             }
             rvalin_translation.showInfo(transId);
         }
