@@ -79,6 +79,8 @@ class FileUpdater implements UpdaterInterface
         }
 
         $options['path'] = dirname($file);
+        
+        $this->_writer->write($catalogue, $extension, $options);
     }
 
     /**
