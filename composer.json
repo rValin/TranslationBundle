@@ -7,7 +7,7 @@
   "name": "rvalin/translation-bundle",
   "description": "a Symfony Bundle to update translation",
   "require": {
-    "php": ">=5.3.9",
+    "php": ">=5.3.9"
   },
   "autoload": {
     "psr-4": { "RValin\\TranslationBundle\\": "" }
