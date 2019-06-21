@@ -3,6 +3,7 @@
 namespace RValin\TranslationBundle\Listener;
 
 use RValin\TranslationBundle\Translation\Translator;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -32,11 +33,11 @@ class TranslationKernelListener
      * TranslatorListener constructor.
      * @param $translator
      */
-    public function __construct($translator, $contentEditable, $requiredRole, AuthorizationCheckerInterface $authChecker)
+    public function __construct(TranslatorInterface $translator, ContainerBagInterface $parameters, AuthorizationCheckerInterface $authChecker)
     {
         $this->translator = $translator;
-        $this->contentEditable = $contentEditable;
-        $this->requiredRole = $requiredRole;
+        $this->contentEditable = $parameters->get('rvalin_translation.edit.content_editable');
+        $this->requiredRole = $parameters->get('rvalin_translation.role');
         $this->authChecked = $authChecker;
     }
 

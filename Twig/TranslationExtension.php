@@ -5,12 +5,14 @@ namespace RValin\TranslationBundle\Twig;
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\TranslatorInterface;
+use Twig\TwigFunction;
 
 class TranslationExtension extends \Twig_Extension
 {
@@ -40,13 +42,13 @@ class TranslationExtension extends \Twig_Extension
      * @param TranslatorInterface $translator
      * @param RouterInterface     $router
      */
-    public function __construct(TranslatorInterface $translator, RouterInterface $router, $useTextarea, $requiredRole, AuthorizationChecker $authorizationChecker)
+    public function __construct(TranslatorInterface $translator, RouterInterface $router, ContainerBagInterface $parameters, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->_translator = $translator;
         $this->_router = $router;
-        $this->_useTextarea = $useTextarea;
+        $this->_useTextarea = $parameters->get('rvalin_translation.edit.textarea');
         $this->_authorizationChecker = $authorizationChecker;
-        $this->_requiredRole = $requiredRole;
+        $this->_requiredRole = $parameters->get('rvalin_translation.role');
     }
 
     /**
@@ -55,8 +57,8 @@ class TranslationExtension extends \Twig_Extension
     public function getFunctions()
     {
         return [
-            'translationList' => new \Twig_SimpleFunction('translationList', [$this, 'translationList'], ['is_safe' => ['html']]),
-            'translationLiveEditIsEnabled' => new \Twig_SimpleFunction('translationLiveEditIsEnabled', [$this, 'translationLiveEditIsEnabled']),
+            'translationList' => new TwigFunction('translationList', [$this, 'translationList'], ['is_safe' => ['html']]),
+            'translationLiveEditIsEnabled' => new TwigFunction('translationLiveEditIsEnabled', [$this, 'translationLiveEditIsEnabled']),
         ];
     }
 

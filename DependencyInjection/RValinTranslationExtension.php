@@ -2,6 +2,7 @@
 
 namespace RValin\TranslationBundle\DependencyInjection;
 
+use RValin\TranslationBundle\Translation\Translator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -16,7 +17,10 @@ use Symfony\Component\DependencyInjection\Loader;
 class RValinTranslationExtension extends Extension
 {
     /**
-     * {@inheritdoc}
+     * @param array            $configs
+     * @param ContainerBuilder $container
+     *
+     * @throws \Exception
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -33,10 +37,7 @@ class RValinTranslationExtension extends Extension
         $container->setParameter('rvalin_translation.edit.textarea', $config['edit']['textarea']);
         $container->setParameter('rvalin_translation.allowed_domains', $config['allowed_domains']);
         $container->setParameter('rvalin_translation.role', $config['role']);
+        $container->setParameter('rvalin_translation.translator_service', $config['translator_service']);
 
-        $definition = $container->findDefinition('rvalin.translation.translator');
-        $definition->replaceArgument(0, new Reference($config['translator_service']));
-
-        $container->setAlias('translator', 'rvalin.translation.translator');
     }
 }

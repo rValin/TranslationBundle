@@ -1,11 +1,14 @@
 <?php
 namespace RValin\TranslationBundle\Translation;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Translation\Translator as BaseTranslator;
 use Symfony\Component\Translation\TranslatorBagInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class Translator implements TranslatorInterface, TranslatorBagInterface
+class Translator implements LegacyTranslatorInterface, TranslatorInterface, TranslatorBagInterface
 {
 
     protected $cacheDir;
@@ -34,11 +37,17 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      */
     protected $_translator;
 
-    public function __construct(TranslatorInterface $translator, $allowedDomains, $cacheDir)
+    /**
+     * Translator constructor.
+     *
+     * @param TranslatorInterface   $translator
+     * @param ContainerBagInterface $parameters
+     */
+    public function __construct(TranslatorInterface $translator, ContainerBagInterface $parameters)
     {
         $this->_translator = $translator;
-        $this->allowedDomains = $allowedDomains;
-        $this->cacheDir = $cacheDir;
+        $this->allowedDomains = $parameters->get('rvalin_translation.allowed_domains');
+        $this->cacheDir = $parameters->get('kernel.cache_dir');
     }
 
     /**

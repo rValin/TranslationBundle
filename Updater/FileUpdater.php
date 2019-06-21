@@ -4,6 +4,7 @@ namespace RValin\TranslationBundle\Updater;
 
 use Symfony\Bundle\FrameworkBundle\Translation\TranslationLoader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\Dumper\FileDumper;
 use Symfony\Component\Translation\MessageCatalogue;
@@ -36,13 +37,13 @@ class FileUpdater implements UpdaterInterface
      */
     private $_writer;
 
-    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerInterface $container, $allowedBundles, $dumpersConfig, TranslationWriterInterface $writer)
+    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerInterface $container, ContainerBagInterface $parameters, TranslationWriterInterface $writer)
     {
         $this->_kernel = $kernel;
         $this->_container = $container;
         $this->reader = $reader;
-        $this->_allowedBundles = $allowedBundles;
-        $this->_dumpersConfig = $dumpersConfig;
+        $this->_allowedBundles = $parameters->get('rvalin_translation.allowed_bundles');
+        $this->_dumpersConfig = $parameters->get('rvalin_translation.dumpers_config');
         $this->_writer = $writer;
     }
 

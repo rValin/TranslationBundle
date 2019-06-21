@@ -2,6 +2,8 @@
 
 namespace RValin\TranslationBundle\DependencyInjection\Compiler;
 
+use RValin\TranslationBundle\Translation\Translator;
+use RValin\TranslationBundle\Updater\Updaters;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
@@ -14,11 +16,12 @@ class UpdatersPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has('rvalin.translation.updaters')) {
+        if (!$container->has(Updaters::class)) {
             return;
         }
 
-        $definition = $container->findDefinition('rvalin.translation.updaters');
+
+        $definition = $container->findDefinition(Updaters::class);
 
         $taggedServices = $container->findTaggedServiceIds('rvalin.translation.updater');
 
@@ -33,5 +36,12 @@ class UpdatersPass implements CompilerPassInterface
                 );
             }
         }
+
+        $translator = $container->getDefinition(Translator::class)->setArguments([
+            new Reference($container->getParameterBag()->get('rvalin_translation.translator_service')),
+            new Reference('parameter_bag'),
+        ]);
+
+//        $container->getDefinition('translator')->setClass(Translator::class);
     }
 }

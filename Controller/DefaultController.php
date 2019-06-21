@@ -2,19 +2,26 @@
 
 namespace RValin\TranslationBundle\Controller;
 
+use RValin\TranslationBundle\Updater\Updaters;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-    public function updateAction(Request $request)
+    /**
+     * @param Request  $request
+     * @param Updaters $updaters
+     *
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function updateAction(Request $request, Updaters $updaters)
     {
         if (!$this->isGranted($this->getParameter('rvalin_translation.role'))) {
             throw $this->createAccessDeniedException();
         }
 
-        $updaters = $this->get('rvalin.translation.updaters');
         $updaterNames = $this->getParameter('rvalin_translation.updaters');
         if (empty($updaterNames)) {
             throw new \InvalidArgumentException('No updater selected');
