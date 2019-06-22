@@ -9,10 +9,6 @@ services:
             - { name: kernel.event_listener, event: kernel.response }
             - { name: kernel.event_listener, event: kernel.request }
 
-    RValin\TranslationBundle\Translation\Translator:
-        autowire: false
-        autoconfigure: false
-        arguments: ['@translator', '@parameter_bag']
 
     RValin\TranslationBundle\Updater\FileUpdater:
         tags:
