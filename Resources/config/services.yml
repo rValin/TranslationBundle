@@ -4,18 +4,24 @@ services:
         autowire: true
         public: false
 
+
+    RValin\TranslationBundle\:
+        resource: '../../*'
+        exclude: '../../{DependencyInjection,Translation,Listener}'
+
     RValin\TranslationBundle\Listener\TranslationKernelListener:
         tags:
             - { name: kernel.event_listener, event: kernel.response }
             - { name: kernel.event_listener, event: kernel.request }
 
+    RValin\TranslationBundle\Translation\Translator:
+        autowire: false
+        autoconfigure: false
+        arguments: ['@translator', '@parameter_bag']
 
     RValin\TranslationBundle\Updater\FileUpdater:
         tags:
             - { name: rvalin.translation.updater, alias: 'file' }
 
-    RValin\TranslationBundle\:
-        resource: '../../*'
-        exclude: '../../{DependencyInjection,Translation}'
 
     translator: '@RValin\TranslationBundle\Translation\Translator'

@@ -2,6 +2,7 @@
 
 namespace RValin\TranslationBundle\Updater;
 
+use RValin\TranslationBundle\Translation\Translator;
 use Symfony\Bundle\FrameworkBundle\Translation\TranslationLoader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -14,16 +15,12 @@ use Symfony\Component\Translation\Writer\TranslationWriterInterface;
 class FileUpdater implements UpdaterInterface
 {
     /**
-     * @var ContainerInterface
-     */
-    protected $_container;
-
-    /**
      * @var KernelInterface
      */
     protected $_kernel;
 
     protected $_allowedBundles;
+    protected $_translator;
 
     protected $_dumpersConfig = [];
 
@@ -37,10 +34,10 @@ class FileUpdater implements UpdaterInterface
      */
     private $_writer;
 
-    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerInterface $container, ContainerBagInterface $parameters, TranslationWriterInterface $writer)
+    public function __construct(KernelInterface $kernel, TranslationReaderInterface $reader, ContainerBagInterface $parameters, TranslationWriterInterface $writer, Translator $translator)
     {
+        $this->_translator = $translator;
         $this->_kernel = $kernel;
-        $this->_container = $container;
         $this->reader = $reader;
         $this->_allowedBundles = $parameters->get('rvalin_translation.allowed_bundles');
         $this->_dumpersConfig = $parameters->get('rvalin_translation.dumpers_config');
@@ -63,7 +60,7 @@ class FileUpdater implements UpdaterInterface
             }
         }
 
-        $this->_container->get('rvalin.translation.translator')->removeLocalesCacheFiles([$locale]);
+        $this->_translator->removeLocalesCacheFiles([$locale]);
     }
 
     /**

@@ -5,7 +5,6 @@ namespace RValin\TranslationBundle\DependencyInjection;
 use RValin\TranslationBundle\Translation\Translator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
@@ -39,16 +38,6 @@ class RValinTranslationExtension extends Extension
         $container->setParameter('rvalin_translation.allowed_domains', $config['allowed_domains']);
         $container->setParameter('rvalin_translation.role', $config['role']);
         $container->setParameter('rvalin_translation.translator_service', $config['translator_service']);
-
-
-        $translator = new Definition(Translator::class, [
-            new Reference($config['translator_service']),
-            $config['allowed_bundles'],
-            $container->getParameter('kernel.cache_dir')
-        ]);
-
-        $container->setDefinition(Translator::class, $translator);
-        $container->setAlias('translator', Translator::class);
 
     }
 }

@@ -185,11 +185,10 @@ class Translator implements LegacyTranslatorInterface, TranslatorInterface, Tran
      * @param string $locale
      * @return boolean
      */
-    public function removeCacheFile($locale)
+    public function removeCacheFile()
     {
-        $localeExploded = explode('_', $locale);
         $finder = new Finder();
-        $finder->files()->in($this->cacheDir)->name(sprintf('/catalogue\.%s.*\.php$/', $localeExploded[0]));
+        $finder->files()->in($this->cacheDir)->name('database.resources.php');
         $deleted = true;
         foreach ($finder as $file) {
             $path = $file->getRealPath();
